@@ -11,15 +11,26 @@ extern crate dotenv;
 extern crate chrono;
 
 use actix::*;
-use actix_web::{server, App, http::{header, Method}, fs, middleware, middleware::cors::Cors};
-use diesel::prelude::SqliteConnection;
+use actix_web::{server, App, http::{header, Method}, middleware, middleware::cors::Cors};
+use diesel::prelude::PgConnection;
 use diesel::r2d2::{ Pool, ConnectionManager };
 
 mod model;
-mod api;
+mod controller;
+mod view;
+mod schema;
 
-use model::db::ConnDsl;
-use api::index::{AppState, home, path};
+use controller::person::{person_list};
+
+pub struct ConnDsl(pub Pool<ConnectionManager<PgConnection>>);
+
+impl Actor for ConnDsl {
+    type Context = SyncContext<Self>;
+}
+
+pub struct AppState {
+    pub db: Addr<Syn, ConnDsl>
+}
 
 fn main(){
     ::std::env::set_var("RUST_LOG", "actix_web=debug");
@@ -28,22 +39,18 @@ fn main(){
     let sys = actix::System::new("vote");
 
     let db_url = dotenv::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let manager = ConnectionManager::<SqliteConnection>::new(db_url);
+    let manager = ConnectionManager::<PgConnection>::new(db_url);
     let conn = Pool::builder().build(manager).expect("failed to create pool.");
     let addr = SyncArbiter::start(num_cpus::get() * 4, move || { ConnDsl(conn.clone())});
     server::new(move || App::with_state(AppState{ db: addr.clone() })
                 .middleware(middleware::Logger::default())
-                .resource("/", |r| r.h(home))
-                .resource("/a/{tail:.*}", |r| r.h(path))
-                /*
                 .configure(|app| Cors::for_app(app)
                            .allowed_methods(vec!["GET", "POST"])
                            .allowed_header(header::CONTENT_TYPE)
                            .max_age(3600)
-                           // resources
+                           .resource("/api/person/list", |r| { r.method(Method::GET).with(person_list) })
                            .register())
-                           */
-                .handler("/", fs::StaticFiles::new("public")))
+                )
         .bind("127.0.0.1:8080").unwrap()
         .shutdown_timeout(2)
         .start();
