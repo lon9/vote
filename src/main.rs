@@ -8,6 +8,7 @@ extern crate actix;
 extern crate actix_web;
 extern crate env_logger;
 extern crate dotenv;
+extern crate chrono;
 
 use actix::*;
 use actix_web::{server, App, http::{header, Method}, fs, middleware, middleware::cors::Cors};
