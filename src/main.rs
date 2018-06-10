@@ -15,18 +15,14 @@ use actix_web::{server, App, http::{header, Method}, middleware, middleware::cor
 use diesel::prelude::PgConnection;
 use diesel::r2d2::{ Pool, ConnectionManager };
 
+mod schema;
+mod db;
 mod model;
 mod controller;
 mod view;
-mod schema;
 
-use controller::person::{person_list};
-
-pub struct ConnDsl(pub Pool<ConnectionManager<PgConnection>>);
-
-impl Actor for ConnDsl {
-    type Context = SyncContext<Self>;
-}
+use controller::person::{person_list, ws};
+use db::ConnDsl;
 
 pub struct AppState {
     pub db: Addr<Syn, ConnDsl>
@@ -49,6 +45,7 @@ fn main(){
                            .allowed_header(header::CONTENT_TYPE)
                            .max_age(3600)
                            .resource("/api/person/list", |r| { r.method(Method::GET).with(person_list) })
+                           .resource("/person/ws", |r| r.route().f(ws))
                            .register())
                 )
         .bind("127.0.0.1:8080").unwrap()
