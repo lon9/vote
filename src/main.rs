@@ -1,5 +1,6 @@
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate serde_derive;
+extern crate rand;
 extern crate serde;
 extern crate serde_json;
 extern crate futures;
@@ -17,15 +18,18 @@ use diesel::r2d2::{ Pool, ConnectionManager };
 
 mod schema;
 mod db;
+mod ws_server;
 mod model;
 mod controller;
 mod view;
 
 use controller::person::{person_list, ws};
 use db::ConnDsl;
+use ws_server::WsServer;
 
 pub struct AppState {
-    pub db: Addr<Syn, ConnDsl>
+    db: Addr<Syn, ConnDsl>,
+    ws: Addr<Syn, WsServer>,    
 }
 
 fn main(){
@@ -38,7 +42,8 @@ fn main(){
     let manager = ConnectionManager::<PgConnection>::new(db_url);
     let conn = Pool::builder().build(manager).expect("failed to create pool.");
     let addr = SyncArbiter::start(num_cpus::get() * 4, move || { ConnDsl(conn.clone())});
-    server::new(move || App::with_state(AppState{ db: addr.clone() })
+    let _ws = Arbiter::start(|_| ws_server::WsServer::default());
+    server::new(move || App::with_state(AppState{ db: addr.clone(), ws: _ws.clone() })
                 .middleware(middleware::Logger::default())
                 .configure(|app| Cors::for_app(app)
                            .allowed_methods(vec!["GET", "POST"])

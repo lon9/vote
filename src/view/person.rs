@@ -6,3 +6,4 @@ pub struct PersonListView {
     pub message: String,
     pub person_list: Vec<Person>,
 }
+
