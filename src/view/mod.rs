@@ -1,2 +1,2 @@
-pub mod person;
 pub mod common;
+pub mod person;

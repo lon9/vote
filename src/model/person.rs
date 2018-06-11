@@ -1,16 +1,15 @@
 use actix::*;
 use actix_web::*;
+use chrono::{NaiveDateTime, Utc};
 use diesel;
 use diesel::prelude::*;
-use chrono::{NaiveDateTime, Utc};
 
-use ConnDsl;
 use schema::persons;
+use view::common::Msgs;
 use view::person::{PersonListView, PersonView};
-use view::common::{Msgs};
+use ConnDsl;
 
-
-#[derive(Clone,Debug,Serialize,Deserialize,PartialEq,Queryable,Identifiable)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Queryable, Identifiable)]
 pub struct Person {
     pub id: i32,
     pub name: String,
@@ -19,8 +18,8 @@ pub struct Person {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Deserialize,Serialize,Debug)]
-pub struct PersonId{
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PersonId {
     person_id: i32,
 }
 
@@ -34,7 +33,11 @@ impl Handler<PersonId> for ConnDsl {
     fn handle(&mut self, person_id: PersonId, _: &mut Self::Context) -> Self::Result {
         use schema::persons::dsl::*;
         let conn = &self.0.get().map_err(error::ErrorInternalServerError)?;
-        let the_person = persons.filter(&id.eq(&person_id.person_id)).load::<Person>(conn).map_err(error::ErrorInternalServerError)?.pop();
+        let the_person = persons
+            .filter(&id.eq(&person_id.person_id))
+            .load::<Person>(conn)
+            .map_err(error::ErrorInternalServerError)?
+            .pop();
         match the_person {
             Some(the_person) => {
                 let current_person = Person {
@@ -49,7 +52,7 @@ impl Handler<PersonId> for ConnDsl {
                     message: "the current_person info.".to_string(),
                     person: current_person,
                 })
-            },
+            }
             None => {
                 let no_person = Person {
                     id: 0,
@@ -63,7 +66,7 @@ impl Handler<PersonId> for ConnDsl {
                     message: "error.".to_string(),
                     person: no_person,
                 })
-            },
+            }
         }
     }
 }
@@ -80,8 +83,10 @@ impl Handler<PersonList> for ConnDsl {
     fn handle(&mut self, _person_list: PersonList, _: &mut Self::Context) -> Self::Result {
         use schema::persons::dsl::*;
         let conn = &self.0.get().map_err(error::ErrorInternalServerError)?;
-        let person_list = persons.load::<Person>(conn).map_err(error::ErrorInternalServerError)?;
-        Ok(PersonListView{
+        let person_list = persons
+            .load::<Person>(conn)
+            .map_err(error::ErrorInternalServerError)?;
+        Ok(PersonListView {
             status: 200,
             message: "person_list result".to_string(),
             person_list: person_list,
@@ -89,7 +94,7 @@ impl Handler<PersonList> for ConnDsl {
     }
 }
 
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PersonUpdate {
     pub person_id: i32,
     pub op: String,
@@ -105,7 +110,11 @@ impl Handler<PersonUpdate> for ConnDsl {
     fn handle(&mut self, person_update: PersonUpdate, _: &mut Self::Context) -> Self::Result {
         use schema::persons::dsl::*;
         let conn = &self.0.get().map_err(error::ErrorInternalServerError)?;
-        let the_person = persons.filter(&id.eq(&person_update.person_id)).load::<Person>(conn).map_err(error::ErrorInternalServerError)?.pop();
+        let the_person = persons
+            .filter(&id.eq(&person_update.person_id))
+            .load::<Person>(conn)
+            .map_err(error::ErrorInternalServerError)?
+            .pop();
         let current_person: Person;
         match the_person {
             Some(the_person) => {
@@ -116,13 +125,13 @@ impl Handler<PersonUpdate> for ConnDsl {
                     created_at: the_person.created_at.clone(),
                     updated_at: the_person.updated_at.clone(),
                 };
-            },
+            }
             None => {
                 return Ok(Msgs {
                     status: 400,
                     message: "person not found".to_string(),
                 })
-            },
+            }
         }
 
         let mut status: i32 = 200;
@@ -130,22 +139,16 @@ impl Handler<PersonUpdate> for ConnDsl {
         match person_update.op.as_ref() {
             "+" => {
                 diesel::update(&current_person)
-                    .set((
-                            vote.eq(vote+1),
-                            updated_at.eq(Utc::now().naive_utc()),
-                    ))
+                    .set((vote.eq(vote + 1), updated_at.eq(Utc::now().naive_utc())))
                     .execute(conn)
                     .map_err(error::ErrorInternalServerError)?;
-            },
+            }
             "-" => {
                 diesel::update(&current_person)
-                    .set((
-                            vote.eq(vote-1),
-                            updated_at.eq(Utc::now().naive_utc()),
-                    ))
+                    .set((vote.eq(vote - 1), updated_at.eq(Utc::now().naive_utc())))
                     .execute(conn)
                     .map_err(error::ErrorInternalServerError)?;
-            },
+            }
             _ => {
                 status = 400;
                 message = "unknown op".to_string();
