@@ -23,7 +23,7 @@ mod model;
 mod controller;
 mod view;
 
-use controller::person::{person_list, ws};
+use controller::person::{person_list, person_update, ws};
 use db::ConnDsl;
 use ws_server::WsServer;
 
@@ -34,7 +34,7 @@ pub struct AppState {
 
 fn main(){
     ::std::env::set_var("RUST_LOG", "actix_web=debug");
-    //::std::env::set_var("RUST_BACKTRACE", "1");
+    ::std::env::set_var("RUST_BACKTRACE", "1");
     env_logger::init();
     let sys = actix::System::new("vote");
 
@@ -50,6 +50,7 @@ fn main(){
                            .allowed_header(header::CONTENT_TYPE)
                            .max_age(3600)
                            .resource("/api/person/list", |r| { r.method(Method::GET).with(person_list) })
+                           //.resource("/api/person/update", |r| { r.method(Method::POST).with2(person_update) })
                            .resource("/person/ws", |r| r.route().f(ws))
                            .register())
                 )

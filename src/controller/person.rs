@@ -3,9 +3,10 @@ use actix::fut;
 use actix_web::*;
 use actix::prelude::*;
 use futures::future::Future;
+use serde_json;
 
 
-use model::person::{PersonList};
+use model::person::{PersonList, PersonUpdate};
 use ws_server;
 use AppState;
 
@@ -20,6 +21,20 @@ pub fn person_list(req: HttpRequest<AppState>) -> FutureResponse<HttpResponse> {
                     Ok(HttpResponse::InternalServerError().into()),
             }
         }).responder()
+}
+
+pub fn person_update(person_update: Json<PersonUpdate>, state: State<AppState>) -> FutureResponse<HttpResponse> {
+    state.db.send(PersonUpdate{
+        person_id: person_update.person_id,
+        op: person_update.op.clone(),
+    })
+    .from_err()
+    .and_then(|res| {
+        match res {
+            Ok(msg) => Ok(HttpResponse::Ok().json(msg)),
+            Err(_) => Ok(HttpResponse::InternalServerError().into())
+        }
+    }).responder()
 }
 
 pub fn ws(req: HttpRequest<AppState>) -> Result<HttpResponse, Error> {
@@ -75,10 +90,22 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for PersonSession{
             ws::Message::Ping(msg) => ctx.pong(&msg),
             ws::Message::Pong(_msg) => self.hb = Instant::now(),
             ws::Message::Text(text) => {
-                ctx.state().ws.do_send(ws_server::ClientMessage{
-                    id: self.id,
-                    msg: text,
-                })
+                let person_update: PersonUpdate = serde_json::from_str(&text).unwrap();
+
+                ctx.state()
+                    .db
+                    .send(PersonUpdate {
+                        person_id: person_update.person_id,
+                        op: person_update.op.clone(),
+                    })
+                    .into_actor(self)
+                    .then(|_res, _act, ctx| {
+                        ctx.state().ws.do_send(ws_server::ClientMessage {
+                            msg: text
+                        });
+                        fut::ok(())
+                    })
+                    .wait(ctx);
             }
             ws::Message::Binary(_bin) => println!("binary is not supported."),
             ws::Message::Close(_) => {

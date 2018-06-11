@@ -20,7 +20,6 @@ pub struct Disconnect {
 
 #[derive(Message)]
 pub struct ClientMessage{
-    pub id: usize,
     pub msg: String,
 }
 
