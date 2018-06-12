@@ -1,3 +1,10 @@
-<p>
-  person works!
-</p>
+<mat-list>
+  <mat-list-item *ngFor="let person of persons">
+    <p matLine>
+      <span>{{ person.name }}</span>
+    </p>
+    {{ person.vote }}
+    <button mat-icon-button (click)="upvote(person)">+</button>
+    <button mat-icon-button (click)="downvote(person)">-</button>
+  </mat-list-item>
+</mat-list>
