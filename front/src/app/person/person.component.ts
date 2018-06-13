@@ -10,9 +10,9 @@ import { WebsocketService } from '../service/websocket.service';
 })
 export class PersonComponent implements OnInit {
 
-  private persons: Person[];
+  persons: Person[];
   private connection: any;
-  private displayedColumns = ['position', 'name', 'vote', 'upvote', 'downvote']
+  displayedColumns = ['position', 'name', 'vote', 'upvote', 'downvote']
 
   constructor(
     private personService: PersonService,
