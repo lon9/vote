@@ -11,7 +11,8 @@ import { WebsocketService } from '../service/websocket.service';
 export class PersonComponent implements OnInit {
 
   private persons: Person[];
-  private connection;
+  private connection: any;
+  private displayedColumns = ['position', 'name', 'vote', 'upvote', 'downvote']
 
   constructor(
     private personService: PersonService,
@@ -22,24 +23,37 @@ export class PersonComponent implements OnInit {
     this.personService.getPersons()
       .subscribe(res => {
         this.persons = res.person_list;
+        this.sortPersons();
         this.websocketService.connect();
         this.connection = this.websocketService.on()
           .subscribe(
             (res) => {
-              console.log(res.data);
-              this.persons.filter((person) => {person.id == res.data.person_id}).map((person, idx) => {
-                if(res.data.op == '+') person[idx].vote++;
-                else if(res.data.op == '-') person[idx].vote--;
-              });
+              const data = JSON.parse(res.data);
               this.persons = this.persons.map((person) => {
-                if(person.id == res.data.person_id){
-                  
+                if(person.id == data.person_id){
+                  if(data.op == '+'){
+                    person.vote++;
+                    return person;
+                  }else if(data.op == '-'){
+                    person.vote--;
+                    return person;
+                  }
                 }
+                return person;
               });
+              this.sortPersons();
             }
           );
       });
 
+  }
+
+  sortPersons(): void{
+    this.persons.sort((a,b) => {
+      if(a.vote > b.vote) return -1;
+      if(a.vote < b.vote) return 1;
+      return 0;
+    });
   }
 
   upvote(person: Person): void{

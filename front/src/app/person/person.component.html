@@ -1,10 +1,35 @@
-<mat-list>
-  <mat-list-item *ngFor="let person of persons">
-    <p matLine>
-      <span>{{ person.name }}</span>
-    </p>
-    {{ person.vote }}
-    <button mat-icon-button (click)="upvote(person)">+</button>
-    <button mat-icon-button (click)="downvote(person)">-</button>
-  </mat-list-item>
-</mat-list>
+<table mat-table [dataSource]="persons">
+
+  <ng-container matColumnDef="position">
+    <th mat-header-cell *matHeaderCellDef>No.</th>
+    <td mat-cell *matCellDef="let person; let i = index">{{ i+1 }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>名前</th>
+    <td mat-cell *matCellDef="let person">{{ person.name }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="vote">
+    <th mat-header-cell *matHeaderCellDef>投票</th>
+    <td mat-cell *matCellDef="let person">{{ person.vote }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="upvote">
+    <th mat-header-cell *matHeaderCellDef>プラス票</th>
+    <td mat-cell *matCellDef="let person">
+        <button mat-icon-button (click)="upvote(person)">+</button>
+    </td>
+  </ng-container>
+  
+  <ng-container matColumnDef="downvote">
+    <th mat-header-cell *matHeaderCellDef>マイナス票</th>
+    <td mat-cell *matCellDef="let person">
+        <button mat-icon-button (click)="downvote(person)">-</button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns; let i= index;"></tr>
+
+</table>
