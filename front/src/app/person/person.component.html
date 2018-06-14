@@ -1,3 +1,14 @@
+<mat-list dense>
+  <mat-list-item *ngFor="let op of voteInfo.ops">
+    <span *ngIf="op.code == '+'">
+      あなたは{{ op.person.name }}に<font color="orange">+</font>票を投じました。
+    </span>
+    <span *ngIf="op.code == '-'">
+      あなたは{{ op.person.name }}に<font color="red">-</font>票を投じました。
+    </span>
+  </mat-list-item>
+</mat-list>
+
 <table mat-table [dataSource]="persons">
 
   <ng-container matColumnDef="position">
@@ -18,14 +29,14 @@
   <ng-container matColumnDef="upvote">
     <th mat-header-cell *matHeaderCellDef>プラス票</th>
     <td mat-cell *matCellDef="let person">
-        <button mat-icon-button (click)="upvote(person)">+</button>
+        <button mat-icon-button (click)="vote(person, '+')">+</button>
     </td>
   </ng-container>
   
   <ng-container matColumnDef="downvote">
     <th mat-header-cell *matHeaderCellDef>マイナス票</th>
     <td mat-cell *matCellDef="let person">
-        <button mat-icon-button (click)="downvote(person)">-</button>
+        <button mat-icon-button (click)="vote(person, '-')">-</button>
     </td>
   </ng-container>
 

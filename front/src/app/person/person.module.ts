@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
-import { MatListModule, MatIconModule, MatButton, MatButtonModule, MatTableModule } from '@angular/material';
+import { MatButtonModule, MatTableModule, MatSnackBarModule, MatListModule } from '@angular/material';
 
 import { PersonComponent } from './person.component';
 
@@ -17,7 +17,9 @@ const routes: Routes = [
     CommonModule,
     RouterModule.forChild(routes),
     MatButtonModule,
-    MatTableModule
+    MatListModule,
+    MatTableModule,
+    MatSnackBarModule
   ],
   exports: [
     RouterModule

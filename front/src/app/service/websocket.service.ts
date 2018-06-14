@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 export class WebsocketService {
 
   private url = 'ws://localhost:8080/person/ws';
-  private socket;
+  private socket: WebSocket;
 
   constructor() {
    }

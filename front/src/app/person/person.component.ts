@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Person } from '../model/person';
-import { PersonService } from '../service/person.service';
+import { PersonService, VoteInfo, Op } from '../service/person.service';
 import { WebsocketService } from '../service/websocket.service';
+import { MatSnackBar } from '@angular/material';
 
 @Component({
   selector: 'app-person',
@@ -12,11 +13,13 @@ export class PersonComponent implements OnInit {
 
   persons: Person[];
   private connection: any;
-  displayedColumns = ['position', 'name', 'vote', 'upvote', 'downvote']
+  displayedColumns = ['position', 'name', 'vote', 'upvote', 'downvote'];
+  voteInfo: VoteInfo;
 
   constructor(
     private personService: PersonService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    public snackBar: MatSnackBar
   ) { }
 
   ngOnInit() {
@@ -45,7 +48,7 @@ export class PersonComponent implements OnInit {
             }
           );
       });
-
+      this.refreshInfo();
   }
 
   sortPersons(): void{
@@ -56,18 +59,38 @@ export class PersonComponent implements OnInit {
     });
   }
 
-  upvote(person: Person): void{
-    this.websocketService.emit({
-      person_id: person.id,
-      op: '+'
-    });
+  refreshInfo(): void{
+    this.voteInfo = this.personService.getVoteInfo();
+    const now = new Date();
+    const created = new Date(this.voteInfo.created);
+    if(now.getDate() - created.getDate() >1){
+      this.personService.removeVoteInfo();
+      this.voteInfo = this.personService.getVoteInfo();
+    }
   }
 
-  downvote(person: Person): void{
+  canVote(): boolean{
+    if(this.voteInfo.ops.length > 4){
+      return false;
+    }
+    return true;
+  }
+
+  vote(person: Person, op: string): void{
+    this.refreshInfo();
+    if(!this.canVote()){
+      this.snackBar.open('1日5回しか投票できません。また明日投票してください。');
+      return;
+    }
     this.websocketService.emit({
       person_id: person.id,
-      op: '-'
+      op: op
     });
+    this.voteInfo.ops.push(new Op(
+      op,
+      person
+    ));
+    this.personService.setVoteInfo(this.voteInfo);
   }
 
 }
