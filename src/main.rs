@@ -66,7 +66,7 @@ fn main() {
                            .resource("/person/ws", |r| r.route().f(ws))
                            .register()
             })
-    }).bind("127.0.0.1:8080")
+    }).bind("0.0.0.0:8080")
         .unwrap()
         .shutdown_timeout(2)
         .start();

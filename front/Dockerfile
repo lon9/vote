@@ -9,4 +9,4 @@ RUN npm install && \
 FROM nginx:alpine
 
 RUN rm -rf /usr/share/nginx/html/*
-COPY --from=node-build-env /src/dist/front/ /usr/share/hginx/html
+COPY --from=node-build-env /src/dist/front/ /usr/share/nginx/html/
