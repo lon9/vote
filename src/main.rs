@@ -29,7 +29,7 @@ mod schema;
 mod view;
 mod ws_server;
 
-use controller::person::{person_list, person_update, ws};
+use controller::person::{person_list, ws};
 use db::ConnDsl;
 use ws_server::WsServer;
 

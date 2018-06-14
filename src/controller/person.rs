@@ -20,6 +20,7 @@ pub fn person_list(req: HttpRequest<AppState>) -> FutureResponse<HttpResponse> {
         })
         .responder()
 }
+/*
 
 pub fn person_update(
     person_update: Json<PersonUpdate>,
@@ -38,6 +39,7 @@ pub fn person_update(
         })
         .responder()
 }
+*/
 
 pub fn ws(req: HttpRequest<AppState>) -> Result<HttpResponse, Error> {
     ws::start(
