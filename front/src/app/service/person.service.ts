@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Person } from '../model/person';
+import { AppConfig } from '../config/app.config';
 
 class Response{
   status: number
@@ -44,7 +45,7 @@ export class PersonService {
   ) { }
 
   getPersons(): Observable<Response>{
-    return this.http.get<Response>('http://localhost:8080/api/person/list');
+    return this.http.get<Response>(AppConfig.endpoints.personList);
   }
 
   getVoteInfo(): VoteInfo {

@@ -1,53 +1,97 @@
-<div fxLayout="column" fxFlexFill>
-  <div fxFlex="50">
-    <mat-list dense>
-      <mat-list-item *ngFor="let op of voteInfo.ops">
-        <span *ngIf="op.code == '+'">
-          あなたは{{ op.person.name }}に
-          <font color="orange">+</font>票を投じました。
-        </span>
-        <span *ngIf="op.code == '-'">
-          あなたは{{ op.person.name }}に
-          <font color="red">-</font>票を投じました。
-        </span>
-      </mat-list-item>
-    </mat-list>
+<mat-card class="mat-elevation-z2 content">
+  <div fxLayout="row" fxLayout.xs="column">
+    <h4 fxFlex="10" fxFlexOffset="5">投票</h4>
+    <div fxFlex fxFlexAlign="center">
+      <small>1日{{ appConfig.votesLimit }}回まで投票できます。あと{{ appConfig.votesLimit - voteInfo.ops.length }}回答票できます。</small>
+    </div>
   </div>
-  <div fxFlex="50">
-    <table mat-table [dataSource]="persons">
 
-      <ng-container matColumnDef="position">
-        <th mat-header-cell *matHeaderCellDef>No.</th>
-        <td mat-cell *matCellDef="let person; let i = index">{{ i+1 }}</td>
-      </ng-container>
+  <div fxLayout="row" fxLayout.xs="column" fxLayoutAlign="space-around">
 
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>名前</th>
-        <td mat-cell *matCellDef="let person">{{ person.name }}</td>
-      </ng-container>
+    <div fxFlex fxHide fxShow.xs="true">
+      <mat-accordion [displayMode]="flat">
+        <mat-expansion-panel class="mat-elevation-z0">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              投票履歴
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-list dense *ngIf="voteInfo.ops.length != 0; else voteNotFound">
+            <mat-list-item *ngFor="let op of voteInfo.ops">
+              <span *ngIf="op.code == '+'">
+                {{ op.person.name }}に
+                <font color="orange">+</font>票を投じました。
+              </span>
+              <span *ngIf="op.code == '-'">
+                {{ op.person.name }}に
+                <font color="red">-</font>票を投じました。
+              </span>
+            </mat-list-item>
+          </mat-list>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
 
-      <ng-container matColumnDef="vote">
-        <th mat-header-cell *matHeaderCellDef>投票</th>
-        <td mat-cell *matCellDef="let person">{{ person.vote }}</td>
-      </ng-container>
+    <div fxFlex="70">
+      <table mat-table [dataSource]="persons">
 
-      <ng-container matColumnDef="upvote">
-        <th mat-header-cell *matHeaderCellDef>プラス票</th>
-        <td mat-cell *matCellDef="let person">
-          <button mat-icon-button (click)="vote(person, '+')">+</button>
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="position">
+          <th mat-header-cell *matHeaderCellDef>No.</th>
+          <td mat-cell *matCellDef="let person; let i = index">{{ i+1 }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="downvote">
-        <th mat-header-cell *matHeaderCellDef>マイナス票</th>
-        <td mat-cell *matCellDef="let person">
-          <button mat-icon-button (click)="vote(person, '-')">-</button>
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>名前</th>
+          <td mat-cell *matCellDef="let person">{{ person.name }}</td>
+        </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns; let i= index;"></tr>
+        <ng-container matColumnDef="vote">
+          <th mat-header-cell *matHeaderCellDef>投票</th>
+          <td mat-cell *matCellDef="let person">{{ person.vote }}</td>
+        </ng-container>
 
-    </table>
+        <ng-container matColumnDef="upvote">
+          <th mat-header-cell *matHeaderCellDef>プラス票</th>
+          <td mat-cell *matCellDef="let person">
+            <button mat-icon-button (click)="vote(person, '+')">+</button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="downvote">
+          <th mat-header-cell *matHeaderCellDef>マイナス票</th>
+          <td mat-cell *matCellDef="let person">
+            <button mat-icon-button (click)="vote(person, '-')">-</button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns; let i= index;"></tr>
+
+      </table>
+    </div>
+    <div fxFlex="30" fxHide.xs="true">
+      <mat-list dense *ngIf="voteInfo.ops.length != 0; else voteNotFound">
+        <h3 mat-subheader>投票履歴</h3>
+        <mat-list-item *ngFor="let op of voteInfo.ops">
+          <span *ngIf="op.code == '+'">
+            {{ op.person.name }}に
+            <font color="orange">+票</font>を投じました。
+          </span>
+          <span *ngIf="op.code == '-'">
+            {{ op.person.name }}に
+            <font color="red">-票</font>を投じました。
+          </span>
+        </mat-list-item>
+      </mat-list>
+    </div>
   </div>
-</div>
+</mat-card>
+
+<ng-template #voteNotFound>
+  <mat-list dense>
+    <h3 mat-subheader>投票履歴</h3>
+    <mat-list-item>
+      今日の投票はありません。
+    </mat-list-item>
+  </mat-list>
+</ng-template>

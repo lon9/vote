@@ -3,9 +3,9 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FlexLayoutModule } from '@angular/flex-layout';
 
 import { AppComponent } from './app.component';
+import { APP_CONFIG, AppConfig } from './config/app.config';
 
 const routes: Routes = [
   {
@@ -29,10 +29,11 @@ const routes: Routes = [
       routes
     ),
     BrowserAnimationsModule,
-    HttpClientModule,
-    FlexLayoutModule
+    HttpClientModule
   ],
-  providers: [],
+  providers: [
+    {provide: APP_CONFIG, useValue: AppConfig}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

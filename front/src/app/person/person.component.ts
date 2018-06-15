@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { Person } from '../model/person';
 import { PersonService, VoteInfo, Op } from '../service/person.service';
 import { WebsocketService } from '../service/websocket.service';
 import { MatSnackBar } from '@angular/material';
+import { AppConfig, APP_CONFIG } from '../config/app.config';
+import { IAppConfig } from '../config/iapp.config';
 
 @Component({
   selector: 'app-person',
@@ -11,16 +13,20 @@ import { MatSnackBar } from '@angular/material';
 })
 export class PersonComponent implements OnInit {
 
+  appConfig: any;
   persons: Person[];
   private connection: any;
   displayedColumns = ['position', 'name', 'vote', 'upvote', 'downvote'];
   voteInfo: VoteInfo;
 
   constructor(
+    @Inject(APP_CONFIG) appConfig: IAppConfig,
     private personService: PersonService,
     private websocketService: WebsocketService,
     public snackBar: MatSnackBar
-  ) { }
+  ) {
+    this.appConfig = appConfig;
+  }
 
   ngOnInit() {
     this.personService.getPersons()
@@ -70,7 +76,7 @@ export class PersonComponent implements OnInit {
   }
 
   canVote(): boolean{
-    if(this.voteInfo.ops.length > 4){
+    if(this.voteInfo.ops.length >= AppConfig.votesLimit){
       return false;
     }
     return true;
@@ -79,7 +85,9 @@ export class PersonComponent implements OnInit {
   vote(person: Person, op: string): void{
     this.refreshInfo();
     if(!this.canVote()){
-      this.snackBar.open('1日5回しか投票できません。また明日投票してください。');
+      this.snackBar.open('1日' + AppConfig.votesLimit + '回しか投票できません。また明日投票してください。', '', {
+        duration: AppConfig.snackBarDuration
+      });
       return;
     }
     this.websocketService.emit({

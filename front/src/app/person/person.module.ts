@@ -1,13 +1,15 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
-import { MatButtonModule, MatTableModule, MatSnackBarModule, MatListModule } from '@angular/material';
+import { MatButtonModule, MatTableModule, MatSnackBarModule, MatListModule, MatExpansionModule, MatCardModule } from '@angular/material';
 
 import { PersonComponent } from './person.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { AppConfig } from '../config/app.config';
 
 const routes: Routes = [
   {
-    path: '',
+    path: AppConfig.routes.person,
     component: PersonComponent
   }
 ]
@@ -19,7 +21,10 @@ const routes: Routes = [
     MatButtonModule,
     MatListModule,
     MatTableModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatExpansionModule,
+    MatCardModule,
+    FlexLayoutModule
   ],
   exports: [
     RouterModule

@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AppConfig } from '../config/app.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WebsocketService {
 
-  private url = 'ws://localhost:8080/person/ws';
+  private url = AppConfig.endpoints.ws;
   private socket: WebSocket;
 
   constructor() {
