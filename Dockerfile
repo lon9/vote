@@ -6,7 +6,8 @@ COPY Cargo.toml Cargo.lock ./
 RUN cargo build --release
 RUN cargo install diesel_cli --no-default-features --features "postgres"
 COPY src src
-RUN cargo build --release
+RUN rm target/release/vote && \
+  cargo build --release
 
 FROM debian:stretch-slim
 COPY --from=rust-build-env /usr/local/cargo/bin/diesel /usr/local/bin/
